@@ -10,7 +10,7 @@
 <p>Thank you for signing up!</p>
 <div th:text="${activationCode}"></div>
 <div>
-    <a th:href="${confirmationUrl} + '?token=' + ${activationCode}" target="_blank">Activate your account</a>
+    <a th:href="${confirmationUrl} + '?activation=' + ${activationCode}" target="_blank">Activate your account</a>
 </div>
 </body>
 </html>

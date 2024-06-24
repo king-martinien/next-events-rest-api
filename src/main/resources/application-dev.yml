@@ -18,5 +18,9 @@ spring:
     port: 9025
 
 application:
+  security:
+    jwt:
+      expiration: 1
+      secret: EY3o41806GnIWOgKpYV3o6CZX9MqPKrZKsuFhKNdc/o=
   mailing:
     frontend: http://localhost:8080/activate-account
