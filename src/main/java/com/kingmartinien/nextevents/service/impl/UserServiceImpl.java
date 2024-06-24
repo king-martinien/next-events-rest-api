@@ -2,11 +2,14 @@ package com.kingmartinien.nextevents.service.impl;
 
 import com.kingmartinien.nextevents.dto.LoginCredentialsDto;
 import com.kingmartinien.nextevents.dto.LoginResponseDto;
+import com.kingmartinien.nextevents.dto.ResetPasswordDto;
+import com.kingmartinien.nextevents.dto.ResetPasswordRequestDto;
 import com.kingmartinien.nextevents.entity.Activation;
 import com.kingmartinien.nextevents.entity.Token;
 import com.kingmartinien.nextevents.entity.User;
 import com.kingmartinien.nextevents.enums.EmailTemplateName;
 import com.kingmartinien.nextevents.exception.ConflictException;
+import com.kingmartinien.nextevents.exception.ResourceNotFoundException;
 import com.kingmartinien.nextevents.repository.ActivationRepository;
 import com.kingmartinien.nextevents.repository.TokenRepository;
 import com.kingmartinien.nextevents.repository.UserRepository;
@@ -41,8 +44,10 @@ public class UserServiceImpl implements UserService {
     private final JwtService jwtService;
     private final TokenRepository tokenRepository;
 
-    @Value("${application.mailing.frontend}")
+    @Value("${application.mailing.frontend.activateAccount}")
     private String confirmationUrl;
+    @Value("${application.mailing.frontend.resetPassword}")
+    private String resetPasswordUrl;
 
     @Override
     public void createUser(User user) throws MessagingException {
@@ -99,6 +104,29 @@ public class UserServiceImpl implements UserService {
         revokeAllUSerTokens(user);
     }
 
+    @Override
+    public void resetPasswordRequest(ResetPasswordRequestDto resetPasswordRequestDto) throws MessagingException {
+        User user = this.userRepository.findByEmail(resetPasswordRequestDto.getEmail())
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", resetPasswordRequestDto.getEmail()));
+        this.sendResetPasswordEmail(user);
+    }
+
+    @Override
+    public void resetPassword(String email, String code, ResetPasswordDto resetPasswordDto) {
+        Activation activation = this.activationRepository.findByCode(code)
+                .orElseThrow(() -> new RuntimeException("Invalid code"));
+        User user = this.userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
+
+        if (activation.getUser().getEmail().equals(user.getEmail())) {
+            user.setPassword(this.passwordEncoder.encode(resetPasswordDto.getPassword()));
+            this.userRepository.save(user);
+            activation.setValidatedAt(LocalDateTime.now());
+            this.activationRepository.save(activation);
+        }
+
+    }
+
     private void revokeAllUSerTokens(User user) {
         List<Token> validTokens = this.tokenRepository.findAllValidTokensByUser(user.getId());
         validTokens.forEach(token -> {
@@ -127,6 +155,18 @@ public class UserServiceImpl implements UserService {
                 confirmationUrl,
                 token,
                 EmailTemplateName.ACTIVATE_ACCOUNT
+        );
+    }
+
+    private void sendResetPasswordEmail(User user) throws MessagingException {
+        String token = this.generateAndSaveActivationToken(user);
+        this.emailService.sendEmail(
+                user.getEmail(),
+                user.fullname(),
+                "Reset Password",
+                resetPasswordUrl,
+                token,
+                EmailTemplateName.RESET_PASSWORD_REQUEST
         );
     }
 

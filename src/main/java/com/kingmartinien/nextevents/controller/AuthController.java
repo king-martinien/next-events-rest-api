@@ -1,8 +1,6 @@
 package com.kingmartinien.nextevents.controller;
 
-import com.kingmartinien.nextevents.dto.CreateUserDto;
-import com.kingmartinien.nextevents.dto.LoginCredentialsDto;
-import com.kingmartinien.nextevents.dto.LoginResponseDto;
+import com.kingmartinien.nextevents.dto.*;
 import com.kingmartinien.nextevents.mapper.UserMapper;
 import com.kingmartinien.nextevents.service.UserService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -43,6 +41,22 @@ public class AuthController {
     @ResponseStatus(HttpStatus.OK)
     public void logout() {
         this.userService.logout();
+    }
+
+    @PostMapping("reset-password-request")
+    @ResponseStatus(HttpStatus.OK)
+    public void resetPasswordRequest(@RequestBody @Valid ResetPasswordRequestDto resetPasswordRequestDto) throws MessagingException {
+        this.userService.resetPasswordRequest(resetPasswordRequestDto);
+    }
+
+    @PostMapping("reset-password")
+    @ResponseStatus(HttpStatus.OK)
+    public void resetPassword(
+            @RequestParam("email") String email,
+            @RequestParam("code") String code,
+            @RequestBody @Valid ResetPasswordDto resetPasswordDto
+    ) {
+        this.userService.resetPassword(email, code, resetPasswordDto);
     }
 
 }

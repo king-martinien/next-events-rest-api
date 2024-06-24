@@ -32,6 +32,7 @@ public class EmailServiceImpl implements EmailService {
                 StandardCharsets.UTF_8.name());
 
         Map<String, Object> properties = new HashMap<>();
+        properties.put("email", to);
         properties.put("username", username);
         properties.put("confirmationUrl", confirmationUrl);
         properties.put("activationCode", activationCode);

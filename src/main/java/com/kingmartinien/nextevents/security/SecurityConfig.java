@@ -30,9 +30,12 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize ->
-                        authorize.requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
+                        authorize.requestMatchers(HttpMethod.POST,
+                                        "auth/register",
+                                        "auth/login",
+                                        "auth/reset-password-request",
+                                        "auth/reset-password").permitAll()
                                 .requestMatchers(HttpMethod.GET, "auth/activate-account").permitAll()
-                                .requestMatchers(HttpMethod.POST, "auth/login").permitAll()
                                 .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)

@@ -23,4 +23,6 @@ application:
       expiration: 1
       secret: EY3o41806GnIWOgKpYV3o6CZX9MqPKrZKsuFhKNdc/o=
   mailing:
-    frontend: http://localhost:8080/activate-account
+    frontend:
+      activateAccount: http://localhost:8080/activate-account
+      resetPassword: http://localhost:8080/reset-password
