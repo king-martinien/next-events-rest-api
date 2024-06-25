@@ -1,6 +1,6 @@
 package com.kingmartinien.nextevents.enums;
 
-public enum Role {
+public enum RoleEnum {
     USER,
     PROVIDER,
     ADMIN

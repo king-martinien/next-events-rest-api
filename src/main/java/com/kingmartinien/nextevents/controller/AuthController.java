@@ -54,8 +54,7 @@ public class AuthController {
     public void resetPassword(
             @RequestParam("email") String email,
             @RequestParam("code") String code,
-            @RequestBody @Valid ResetPasswordDto resetPasswordDto
-    ) {
+            @RequestBody @Valid ResetPasswordDto resetPasswordDto) {
         this.userService.resetPassword(email, code, resetPasswordDto);
     }
 

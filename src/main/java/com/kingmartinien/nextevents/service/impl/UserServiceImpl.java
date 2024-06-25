@@ -2,12 +2,14 @@ package com.kingmartinien.nextevents.service.impl;
 
 import com.kingmartinien.nextevents.dto.*;
 import com.kingmartinien.nextevents.entity.Activation;
+import com.kingmartinien.nextevents.entity.Role;
 import com.kingmartinien.nextevents.entity.Token;
 import com.kingmartinien.nextevents.entity.User;
 import com.kingmartinien.nextevents.enums.EmailTemplateName;
 import com.kingmartinien.nextevents.exception.ConflictException;
 import com.kingmartinien.nextevents.exception.ResourceNotFoundException;
 import com.kingmartinien.nextevents.repository.ActivationRepository;
+import com.kingmartinien.nextevents.repository.RoleRepository;
 import com.kingmartinien.nextevents.repository.TokenRepository;
 import com.kingmartinien.nextevents.repository.UserRepository;
 import com.kingmartinien.nextevents.security.JwtService;
@@ -40,6 +42,7 @@ public class UserServiceImpl implements UserService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final TokenRepository tokenRepository;
+    private final RoleRepository roleRepository;
 
     @Value("${application.mailing.frontend.activateAccount}")
     private String confirmationUrl;
@@ -50,13 +53,18 @@ public class UserServiceImpl implements UserService {
     public void createUser(User user) throws MessagingException {
         Optional<User> foundUserWithPhone = userRepository.findByPhone(user.getPhone());
         Optional<User> foundUserWithEmail = userRepository.findByEmail(user.getEmail());
+        Optional<Role> optionalRole = this.roleRepository.findByLabel(user.getRole().getLabel());
         if (foundUserWithPhone.isPresent()) {
             throw new ConflictException("User", "phone", user.getPhone());
         }
         if (foundUserWithEmail.isPresent()) {
             throw new ConflictException("User", "email", user.getEmail());
         }
+        if (optionalRole.isEmpty()) {
+            throw new ResourceNotFoundException("Role", "label", user.getRole().getLabel().name());
+        }
         user.setPassword(this.passwordEncoder.encode(user.getPassword()));
+        user.setRole(optionalRole.get());
         this.userRepository.save(user);
         this.sendValidationEmail(user);
     }
@@ -139,6 +147,11 @@ public class UserServiceImpl implements UserService {
         this.revokeAllUSerTokens(token.getUser());
         this.saveUserToken(newToken, newRefreshToken, token.getUser());
         return LoginResponseDto.builder().accessToken(newToken).refreshToken(newRefreshToken).build();
+    }
+
+    @Override
+    public List<User> getAllUsers() {
+        return this.userRepository.findAll();
     }
 
     private void revokeAllUSerTokens(User user) {

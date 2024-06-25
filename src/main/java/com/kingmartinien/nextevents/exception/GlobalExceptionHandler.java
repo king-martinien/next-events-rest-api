@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -26,6 +27,16 @@ public class GlobalExceptionHandler {
         return ErrorDto.builder()
                 .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .error(exception.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorDto handleAuthorizationDeniedException() {
+        return ErrorDto.builder()
+                .code(HttpStatus.FORBIDDEN.value())
+                .error("You are not authorized to perform this action")
                 .timestamp(LocalDateTime.now())
                 .build();
     }

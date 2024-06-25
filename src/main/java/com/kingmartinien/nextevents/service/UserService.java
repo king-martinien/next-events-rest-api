@@ -4,6 +4,8 @@ import com.kingmartinien.nextevents.dto.*;
 import com.kingmartinien.nextevents.entity.User;
 import jakarta.mail.MessagingException;
 
+import java.util.List;
+
 public interface UserService {
 
     void createUser(User user) throws MessagingException;
@@ -19,5 +21,7 @@ public interface UserService {
     void resetPassword(String email, String code, ResetPasswordDto resetPasswordDto);
 
     LoginResponseDto refreshToken(RefreshTokenDto refreshTokenDto);
+
+    List<User> getAllUsers();
 
 }

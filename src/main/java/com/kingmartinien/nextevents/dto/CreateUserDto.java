@@ -1,6 +1,6 @@
 package com.kingmartinien.nextevents.dto;
 
-import com.kingmartinien.nextevents.enums.Role;
+import com.kingmartinien.nextevents.entity.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;

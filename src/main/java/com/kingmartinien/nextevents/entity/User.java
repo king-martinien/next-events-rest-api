@@ -1,6 +1,5 @@
 package com.kingmartinien.nextevents.entity;
 
-import com.kingmartinien.nextevents.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedBy;
@@ -62,13 +61,13 @@ public class User implements UserDetails {
     @Column(name = "enabled")
     private boolean enabled;
 
-    @Column(name = "role")
-    @Enumerated(EnumType.STRING)
+    @OneToOne(cascade = CascadeType.REMOVE)
+    @JoinColumn(name = "role_id_fk")
     private Role role;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(this.role.name()));
+        return List.of(new SimpleGrantedAuthority(this.role.getLabel().name()));
     }
 
     @Override
