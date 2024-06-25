@@ -34,7 +34,8 @@ public class SecurityConfig {
                                         "auth/register",
                                         "auth/login",
                                         "auth/reset-password-request",
-                                        "auth/reset-password").permitAll()
+                                        "auth/reset-password",
+                                        "auth/refresh-token").permitAll()
                                 .requestMatchers(HttpMethod.GET, "auth/activate-account").permitAll()
                                 .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

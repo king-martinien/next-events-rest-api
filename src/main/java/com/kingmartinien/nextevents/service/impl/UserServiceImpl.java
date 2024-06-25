@@ -1,9 +1,6 @@
 package com.kingmartinien.nextevents.service.impl;
 
-import com.kingmartinien.nextevents.dto.LoginCredentialsDto;
-import com.kingmartinien.nextevents.dto.LoginResponseDto;
-import com.kingmartinien.nextevents.dto.ResetPasswordDto;
-import com.kingmartinien.nextevents.dto.ResetPasswordRequestDto;
+import com.kingmartinien.nextevents.dto.*;
 import com.kingmartinien.nextevents.entity.Activation;
 import com.kingmartinien.nextevents.entity.Token;
 import com.kingmartinien.nextevents.entity.User;
@@ -91,9 +88,10 @@ public class UserServiceImpl implements UserService {
             HashMap<String, Object> claims = new HashMap<>();
             claims.put("fullname", user.fullname());
             String jwtToken = this.jwtService.generateJwtToken(claims, user);
+            String refreshToken = this.jwtService.generateRefreshToken(user);
             this.revokeAllUSerTokens(user);
-            this.saveUserToken(jwtToken, user);
-            return LoginResponseDto.builder().accessToken(jwtToken).build();
+            this.saveUserToken(jwtToken, refreshToken, user);
+            return LoginResponseDto.builder().accessToken(jwtToken).refreshToken(refreshToken).build();
         }
         return null;
     }
@@ -127,6 +125,22 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    @Override
+    public LoginResponseDto refreshToken(RefreshTokenDto refreshTokenDto) {
+        Token token = this.tokenRepository.findByRefreshToken(refreshTokenDto.getRefreshToken())
+                .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
+        if (!this.jwtService.isRefreshTokenValid(token.getRefreshToken(), token.getUser())) {
+            throw new RuntimeException("Expired refresh token");
+        }
+        HashMap<String, Object> claims = new HashMap<>();
+        claims.put("fullname", token.getUser().fullname());
+        String newToken = this.jwtService.generateJwtToken(claims, token.getUser());
+        String newRefreshToken = this.jwtService.generateRefreshToken(token.getUser());
+        this.revokeAllUSerTokens(token.getUser());
+        this.saveUserToken(newToken, newRefreshToken, token.getUser());
+        return LoginResponseDto.builder().accessToken(newToken).refreshToken(newRefreshToken).build();
+    }
+
     private void revokeAllUSerTokens(User user) {
         List<Token> validTokens = this.tokenRepository.findAllValidTokensByUser(user.getId());
         validTokens.forEach(token -> {
@@ -136,11 +150,12 @@ public class UserServiceImpl implements UserService {
         this.tokenRepository.saveAll(validTokens);
     }
 
-    private void saveUserToken(String jwtToken, User user) {
+    private void saveUserToken(String jwtToken, String refreshToken, User user) {
         Token token = Token.builder()
                 .token(jwtToken)
                 .expired(false)
                 .revoked(false)
+                .refreshToken(refreshToken)
                 .user(user)
                 .build();
         this.tokenRepository.save(token);

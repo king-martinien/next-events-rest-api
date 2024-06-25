@@ -26,6 +26,9 @@ public class Token {
     @Column(name = "revoked")
     private boolean revoked;
 
+    @Column(name = "refresh_token")
+    private String refreshToken;
+
     @ManyToOne
     @JoinColumn(name = "user_id_fk")
     private User user;

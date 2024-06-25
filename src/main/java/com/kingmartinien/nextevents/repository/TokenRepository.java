@@ -17,6 +17,9 @@ public interface TokenRepository extends JpaRepository<Token, Long> {
             \s""")
     List<Token> findAllValidTokensByUser(Long userId);
 
+    @Query("SELECT T FROM Token AS T WHERE T.refreshToken = :refreshToken")
+    Optional<Token> findByRefreshToken(String refreshToken);
+
     void deleteAllByExpiredAndRevoked(boolean expired, boolean revoked);
 
 }

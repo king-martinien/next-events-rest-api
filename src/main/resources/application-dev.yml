@@ -20,7 +20,9 @@ spring:
 application:
   security:
     jwt:
-      expiration: 1
+      expiration:
+        accessToken: 1
+        refreshToken: 7
       secret: EY3o41806GnIWOgKpYV3o6CZX9MqPKrZKsuFhKNdc/o=
   mailing:
     frontend:

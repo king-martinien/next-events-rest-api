@@ -59,4 +59,10 @@ public class AuthController {
         this.userService.resetPassword(email, code, resetPasswordDto);
     }
 
+    @PostMapping("refresh-token")
+    @ResponseStatus(HttpStatus.OK)
+    public LoginResponseDto refreshToken(@RequestBody @Valid RefreshTokenDto refreshTokenDto) {
+        return this.userService.refreshToken(refreshTokenDto);
+    }
+
 }
